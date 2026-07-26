@@ -1126,22 +1126,74 @@
     el.classList.toggle('open');
   }
 
-  function submitForm() {
+  // Supabase config
+  const SUPABASE_URL = 'https://rpfvjhtifypdqiyfeoey.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+
+  async function submitForm() {
     const name = document.getElementById('fullName').value.trim();
     const email = document.getElementById('email').value.trim();
     const count = document.getElementById('shipmentCount').value;
     const cargo = document.getElementById('currentCargo').value.trim();
     if (!name || !email || !count) { alert('Lütfen zorunlu alanları doldurun.'); return; }
-    document.getElementById('form-fields').style.display = 'none';
-    document.getElementById('form-success').style.display = 'block';
+
+    const btn = document.querySelector('.form-submit');
+    btn.textContent = 'Gönderiliyor...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/early_access`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ name, email, cargo_company: cargo, company: count })
+      });
+      if (!res.ok) throw new Error('Hata');
+      document.getElementById('form-fields').style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+    } catch (e) {
+      alert('Bir hata oluştu, lütfen tekrar deneyin.');
+      btn.textContent = 'Beta Sürümüne Katıl →';
+      btn.disabled = false;
+    }
   }
 
-  function submitContact() {
+  async function submitContact() {
     const name = document.getElementById('contactName').value.trim();
     const email = document.getElementById('contactEmail').value.trim();
     const msg = document.getElementById('contactMessage').value.trim();
     if (!name || !email || !msg) { alert('Lütfen tüm alanları doldurun.'); return; }
-    alert('Mesajınız alındı! En kısa sürede dönüş yapacağız.');
+
+    const btn = document.querySelector('#contact .btn-primary');
+    btn.textContent = 'Gönderiliyor...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/contact_messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ name, email, message: msg })
+      });
+      if (!res.ok) throw new Error('Hata');
+      btn.textContent = 'Gönderildi ✓';
+      document.getElementById('contactName').value = '';
+      document.getElementById('contactEmail').value = '';
+      document.getElementById('contactMessage').value = '';
+      setTimeout(() => { btn.textContent = 'Gönder'; btn.disabled = false; }, 3000);
+    } catch (e) {
+      alert('Bir hata oluştu, lütfen tekrar deneyin.');
+      btn.textContent = 'Gönder';
+      btn.disabled = false;
+    }
   }
 
   const observer = new IntersectionObserver((entries) => {
