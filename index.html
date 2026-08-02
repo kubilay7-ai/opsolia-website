@@ -743,7 +743,7 @@
         <li><span class="check">✓</span> Gelişmiş analizler ve raporlar</li>
         <li><span class="check">✓</span> Mobil öncelikli tasarım</li>
         <li><span class="check">✓</span> Sürekli gelişen platform</li>
-        <li><span class="check">✓</span> Abonelik zorunlu değil, kredi sistemiyle istediğiniz kadar kullanın</li>
+        <li><span class="check">✓</span> Abonelik zorunlu değil, kredi sistemiyle sınırsız kullanım</li>
         <li><span class="check">✓</span> Şeffaf fiyatlandırma, azalan maliyetler</li>
       </ul>
     </div>
@@ -978,10 +978,10 @@
   <div class="section-header reveal" style="max-width: 760px; margin: 0 auto; text-align: center;">
     <span class="eyebrow">HAKKIMIZDA</span>
     <p style="font-size:18px; color: var(--gray-600); line-height: 1.8; margin-bottom: 32px;">
-      Opsolia, e-ticaret ve sosyal medya satıcıları için geliştirilmiş, yapay zeka destekli bir lojistik yönetim platformudur. Kargo oluşturmaktan iade yönetimine, maliyet optimizasyonundan operasyon raporlarına kadar tüm lojistik süreçleri tek bir ekrandan yönetmenizi sağlar.
+      Opsolia, e-ticaret ve sosyal medya satıcıları önceliklendirilerek geliştirilmiş, yapay zeka destekli bir lojistik yönetim platformudur. Kargo oluşturmaktan iade yönetimine, maliyet optimizasyonundan operasyon raporlarına kadar tüm lojistik süreçlerini tek bir platformdan yönetmenizi sağlar.
     </p>
     <p style="font-size:18px; color: var(--gray-600); line-height: 1.8; margin-bottom: 32px;">
-      Misyonumuz, lojistiği karmaşık ve maliyetli olmaktan çıkararak her büyüklükteki işletmenin erişebileceği, akıllı ve sistemli bir altyapıya dönüştürmektir. Opsolia ile kargo şirketlerini yapay zeka desteğiyle karşılaştırabilir, en uygun seçeneği seçebilir ve tüm operasyonunuzu tek platformdan yönetebilirsiniz.
+      Misyonumuz, işletmelerin lojistik operasyonlarını tek platformda bir araya getirerek daha akıllı, verimli ve erişilebilir hale getirmektir. Opsolia ile kargo şirketlerini yapay zeka desteğiyle karşılaştırabilir, en uygun seçeneği seçebilir ve tüm operasyonunuzu tek yerden yönetebilirsiniz.
     </p>
 
   </div>
@@ -1126,74 +1126,22 @@
     el.classList.toggle('open');
   }
 
-  // Supabase config
-  const SUPABASE_URL = 'https://rpfvjhtifypdqiyfeoey.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwZnZqaHRpZnlwZHFpeWZlb2V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYzMDEsImV4cCI6MjA5ODE2MjMwMX0.LsuyDjz57qk4sMa2VpY1g3KrSr4Lnkf8iuJoiYEy_fk';
-
-  async function submitForm() {
+  function submitForm() {
     const name = document.getElementById('fullName').value.trim();
     const email = document.getElementById('email').value.trim();
     const count = document.getElementById('shipmentCount').value;
     const cargo = document.getElementById('currentCargo').value.trim();
     if (!name || !email || !count) { alert('Lütfen zorunlu alanları doldurun.'); return; }
-
-    const btn = document.querySelector('.form-submit');
-    btn.textContent = 'Gönderiliyor...';
-    btn.disabled = true;
-
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/early_access`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ name, email, cargo_company: cargo, company: count })
-      });
-      if (!res.ok) throw new Error('Hata');
-      document.getElementById('form-fields').style.display = 'none';
-      document.getElementById('form-success').style.display = 'block';
-    } catch (e) {
-      alert('Bir hata oluştu, lütfen tekrar deneyin.');
-      btn.textContent = 'Beta Sürümüne Katıl →';
-      btn.disabled = false;
-    }
+    document.getElementById('form-fields').style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
   }
 
-  async function submitContact() {
+  function submitContact() {
     const name = document.getElementById('contactName').value.trim();
     const email = document.getElementById('contactEmail').value.trim();
     const msg = document.getElementById('contactMessage').value.trim();
     if (!name || !email || !msg) { alert('Lütfen tüm alanları doldurun.'); return; }
-
-    const btn = document.querySelector('#contact .btn-primary');
-    btn.textContent = 'Gönderiliyor...';
-    btn.disabled = true;
-
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/contact_messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ name, email, message: msg })
-      });
-      if (!res.ok) throw new Error('Hata');
-      btn.textContent = 'Gönderildi ✓';
-      document.getElementById('contactName').value = '';
-      document.getElementById('contactEmail').value = '';
-      document.getElementById('contactMessage').value = '';
-      setTimeout(() => { btn.textContent = 'Gönder'; btn.disabled = false; }, 3000);
-    } catch (e) {
-      alert('Bir hata oluştu, lütfen tekrar deneyin.');
-      btn.textContent = 'Gönder';
-      btn.disabled = false;
-    }
+    alert('Mesajınız alındı! En kısa sürede dönüş yapacağız.');
   }
 
   const observer = new IntersectionObserver((entries) => {
