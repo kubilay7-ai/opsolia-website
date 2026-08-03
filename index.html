@@ -1121,28 +1121,52 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-  function toggleFaq(el) {
-    el.classList.toggle('open');
-  }
+  const _supabase = supabase.createClient(
+    'https://rpfvjhtifypdqiyfeoey.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwZnZqaHRpZnlwZHFpeWZlb2V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYzMDEsImV4cCI6MjA5ODE2MjMwMX0.LsuyDjz57qk4sMa2VpY1g3KrSr4Lnkf8iuJoiYEy_fk'
+  );
 
-  function submitForm() {
+  async function submitForm() {
     const name = document.getElementById('fullName').value.trim();
     const email = document.getElementById('email').value.trim();
     const count = document.getElementById('shipmentCount').value;
     const cargo = document.getElementById('currentCargo').value.trim();
     if (!name || !email || !count) { alert('Lütfen zorunlu alanları doldurun.'); return; }
+    const btn = document.querySelector('#form-fields .form-submit');
+    btn.disabled = true; btn.textContent = 'Gönderiliyor...';
+    const { error } = await _supabase.from('early_access').insert([{
+      full_name: name, email: email, shipment_count: count, cargo_company: cargo || null
+    }]);
+    if (error) {
+      btn.disabled = false; btn.textContent = 'Beta Sürümüne Katıl →';
+      alert(error.code === '23505' ? 'Bu e-posta adresi zaten kayıtlı!' : 'Bir hata oluştu, lütfen tekrar deneyin.');
+      return;
+    }
     document.getElementById('form-fields').style.display = 'none';
     document.getElementById('form-success').style.display = 'block';
   }
 
-  function submitContact() {
+  async function submitContact() {
     const name = document.getElementById('contactName').value.trim();
     const email = document.getElementById('contactEmail').value.trim();
     const msg = document.getElementById('contactMessage').value.trim();
     if (!name || !email || !msg) { alert('Lütfen tüm alanları doldurun.'); return; }
+    const btn = document.querySelector('#contact .btn-primary');
+    btn.disabled = true; btn.textContent = 'Gönderiliyor...';
+    const { error } = await _supabase.from('contact_messages').insert([{
+      full_name: name, email: email, message: msg
+    }]);
+    btn.disabled = false; btn.textContent = 'Gönder';
+    if (error) { alert('Bir hata oluştu, lütfen tekrar deneyin.'); return; }
+    document.getElementById('contactName').value = '';
+    document.getElementById('contactEmail').value = '';
+    document.getElementById('contactMessage').value = '';
     alert('Mesajınız alındı! En kısa sürede dönüş yapacağız.');
   }
+
+  function toggleFaq(el) { el.classList.toggle('open'); }
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
