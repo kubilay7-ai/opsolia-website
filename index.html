@@ -1126,22 +1126,77 @@
     el.classList.toggle('open');
   }
 
-  function submitForm() {
+  const SUPABASE_URL = 'https://rpfvjhtifypdqiyfeoey.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwZnZqaHRpZnlwZHFpeWZlb2V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYzMDEsImV4cCI6MjA5ODE2MjMwMX0.LsuyDjz57qk4sMa2VpY1g3KrSr4Lnkf8iuJoiYEy_fk';
+
+  async function supabaseInsert(table, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+    return res;
+  }
+
+  async function submitForm() {
     const name = document.getElementById('fullName').value.trim();
     const email = document.getElementById('email').value.trim();
     const count = document.getElementById('shipmentCount').value;
     const cargo = document.getElementById('currentCargo').value.trim();
     if (!name || !email || !count) { alert('Lütfen zorunlu alanları doldurun.'); return; }
-    document.getElementById('form-fields').style.display = 'none';
-    document.getElementById('form-success').style.display = 'block';
+
+    try {
+      const res = await supabaseInsert('early_access', {
+        name: name,
+        email: email,
+        company: count,
+        cargo_company: cargo || null
+      });
+      if (res.ok || res.status === 201) {
+        document.getElementById('form-fields').style.display = 'none';
+        document.getElementById('form-success').style.display = 'block';
+      } else {
+        const err = await res.text();
+        console.error('Erken erişim hatası:', err);
+        alert('Bir hata oluştu, lütfen tekrar deneyin.');
+      }
+    } catch(e) {
+      console.error('Bağlantı hatası:', e);
+      alert('Bağlantı hatası, lütfen tekrar deneyin.');
+    }
   }
 
-  function submitContact() {
+  async function submitContact() {
     const name = document.getElementById('contactName').value.trim();
     const email = document.getElementById('contactEmail').value.trim();
     const msg = document.getElementById('contactMessage').value.trim();
     if (!name || !email || !msg) { alert('Lütfen tüm alanları doldurun.'); return; }
-    alert('Mesajınız alındı! En kısa sürede dönüş yapacağız.');
+
+    try {
+      const res = await supabaseInsert('contact_messages', {
+        name: name,
+        email: email,
+        message: msg
+      });
+      if (res.ok || res.status === 201) {
+        alert('Mesajınız alındı! En kısa sürede dönüş yapacağız.');
+        document.getElementById('contactName').value = '';
+        document.getElementById('contactEmail').value = '';
+        document.getElementById('contactMessage').value = '';
+      } else {
+        const err = await res.text();
+        console.error('İletişim hatası:', err);
+        alert('Bir hata oluştu, lütfen tekrar deneyin.');
+      }
+    } catch(e) {
+      console.error('Bağlantı hatası:', e);
+      alert('Bağlantı hatası, lütfen tekrar deneyin.');
+    }
   }
 
   const observer = new IntersectionObserver((entries) => {
